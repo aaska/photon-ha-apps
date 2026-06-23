@@ -36,10 +36,17 @@ else
     echo "[Warning] No options file found at $OPTIONS_FILE. Using default environment."
 fi
 
-# Ensure uv is globally accessible (in case it is installed under /root/.local/bin)
+# Ensure uv is globally accessible (in case it is installed under /root/.local/bin or similar)
 if ! command -v uv >/dev/null 2>&1; then
-    echo "[Info] uv not found in PATH. Searching for uv binary..."
-    FOUND_UV=$(find / -name uv -type f 2>/dev/null | head -n 1)
+    echo "[Info] uv not found in PATH. Searching common paths..."
+    FOUND_UV=""
+    for p in /root/.local/bin/uv /root/.cargo/bin/uv /usr/local/bin/uv /usr/bin/uv /bin/uv /home/photon/.local/bin/uv /home/photon/.cargo/bin/uv; do
+        if [ -f "$p" ]; then
+            FOUND_UV="$p"
+            break
+        fi
+    done
+
     if [ -n "$FOUND_UV" ]; then
         echo "[Info] Found uv at $FOUND_UV. Copying to /usr/local/bin/uv for global accessibility..."
         cp "$FOUND_UV" /usr/local/bin/uv
