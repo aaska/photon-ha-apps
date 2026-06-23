@@ -70,6 +70,9 @@ if [ ! -f "$ENTRYPOINT_PATH" ]; then
     fi
 fi
 
+# Make sure the original entrypoint script is executable
+chmod +x "$ENTRYPOINT_PATH" 2>/dev/null || true
+
 # Hand over execution to the original entrypoint script of the base image
 echo "[Info] Starting original entrypoint: $ENTRYPOINT_PATH"
 exec "$ENTRYPOINT_PATH" "$@"
