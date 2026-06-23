@@ -75,7 +75,7 @@ if found:
 else:
     print("[Warning] Could not find executable \x27uv\x27 binary in filesystem.")
     print("[Debug] Listing directory contents:")
-    for d in ["/bin", "/usr/bin", "/usr/local/bin", "/photon"]:
+    for d in ["/bin", "/usr/bin", "/usr/local/bin", "/photon", "/root", "/photon/.venv/bin", "/home"]:
         if os.path.exists(d):
             try:
                 print(f"Contents of {d}: {os.listdir(d)}")
