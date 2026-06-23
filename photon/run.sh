@@ -91,6 +91,29 @@ else:
     else
         echo "[Warning] Python not found, skipping uv search."
     fi
+
+    # If the Python search failed to find and copy uv, download it using the official installer
+    if [ ! -f "/usr/local/bin/uv" ]; then
+        echo "[Info] uv still not found. Downloading and installing uv..."
+        export UV_INSTALL_DIR="/usr/local/bin"
+        if command -v curl >/dev/null 2>&1; then
+            curl -LsSf https://astral.sh/uv/install.sh | sh
+        elif command -v wget >/dev/null 2>&1; then
+            wget -qO- https://astral.sh/uv/install.sh | sh
+        else
+            echo "[Error] Neither curl nor wget is found. Cannot download uv."
+            exit 1
+        fi
+        
+        # Verify it was successfully installed
+        if [ -f "/usr/local/bin/uv" ]; then
+            chmod +x /usr/local/bin/uv
+            echo "[Info] Successfully installed uv to /usr/local/bin/uv."
+        else
+            echo "[Error] uv installation failed."
+            exit 1
+        fi
+    fi
 fi
 
 # Ensure persistent /data/photon_db directory exists and has permissive permissions
