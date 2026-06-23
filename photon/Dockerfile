@@ -9,3 +9,4 @@ RUN chmod a+x /run.sh
 
 # Set the wrapper script as the entrypoint
 ENTRYPOINT ["/run.sh"]
+CMD ["uv", "run", "-m", "src.process_manager"]
