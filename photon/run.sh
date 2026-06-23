@@ -74,13 +74,19 @@ if found:
         sys.stderr.write(f"Failed to copy uv: {e}\n")
 else:
     print("[Warning] Could not find executable \x27uv\x27 binary in filesystem.")
-    print("[Debug] Listing directory contents:")
-    for d in ["/bin", "/usr/bin", "/usr/local/bin", "/photon", "/root", "/photon/.venv/bin", "/home"]:
-        if os.path.exists(d):
-            try:
-                print(f"Contents of {d}: {os.listdir(d)}")
-            except Exception as e:
-                print(f"Failed to list {d}: {e}")
+    print("[Debug] Searching entire filesystem for any file containing \x27uv\x27:")
+    for root, dirs, files in os.walk("/"):
+        if any(root.startswith(d) for d in ["/proc", "/sys", "/dev", "/data", "/photon/data", "/photon/photon_db"]):
+            dirs[:] = []
+            continue
+        for f in files:
+            if "uv" in f:
+                p = os.path.join(root, f)
+                try:
+                    stat = os.stat(p)
+                    print(f"File: {p} | Size: {stat.st_size} | Mode: {oct(stat.st_mode)}")
+                except Exception as e:
+                    print(f"File: {p} (Error reading: {e})")
 '
     else
         echo "[Warning] Python not found, skipping uv search."
