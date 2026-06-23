@@ -74,8 +74,15 @@ if found:
         sys.stderr.write(f"Failed to copy uv: {e}\n")
 else:
     print("[Warning] Could not find executable \x27uv\x27 binary in filesystem.")
+    print("[Debug] Listing directory contents:")
+    for d in ["/bin", "/usr/bin", "/usr/local/bin", "/photon"]:
+        if os.path.exists(d):
+            try:
+                print(f"Contents of {d}: {os.listdir(d)}")
+            except Exception as e:
+                print(f"Failed to list {d}: {e}")
 '
-    else:
+    else
         echo "[Warning] Python not found, skipping uv search."
     fi
 fi
