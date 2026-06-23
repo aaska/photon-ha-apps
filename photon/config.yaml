@@ -1,0 +1,33 @@
+name: "Photon Geocoder"
+version: "1.0.0"
+slug: "photon_geocoder"
+description: "Self-hosted Photon geocoder and reverse geocoder based on OpenStreetMap data."
+arch:
+  - amd64
+  - aarch64
+  - armv7
+startup: "application"
+boot: "auto"
+ports:
+  2322/tcp: 2322
+ports_description:
+  2322/tcp: "Photon API"
+options:
+  import_mode: "db"
+  region: "germany"
+  languages: "en"
+  update_strategy: "PARALLEL"
+  update_interval: "720h"
+  download_max_retries: 5
+  extra_tags: ""
+schema:
+  import_mode: "list(db|jsonl)"
+  region: "str"
+  languages: "str?"
+  update_strategy: "list(PARALLEL|SEQUENTIAL|DISABLED)"
+  update_interval: "str?"
+  download_max_retries: "int?"
+  extra_tags: "str?"
+backup_exclude:
+  - "photon_db"
+
