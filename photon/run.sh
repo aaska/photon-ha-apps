@@ -58,9 +58,11 @@ fi
 
 
 # Find the original entrypoint script of the base image
-ENTRYPOINT_PATH="/entrypoint.sh"
+ENTRYPOINT_PATH="/photon/entrypoint.sh"
 if [ ! -f "$ENTRYPOINT_PATH" ]; then
-    if command -v entrypoint.sh >/dev/null 2>&1; then
+    if [ -f "/entrypoint.sh" ]; then
+        ENTRYPOINT_PATH="/entrypoint.sh"
+    elif command -v entrypoint.sh >/dev/null 2>&1; then
         ENTRYPOINT_PATH=$(command -v entrypoint.sh)
     else
         echo "[Error] Could not find the original entrypoint.sh script in the base image."
