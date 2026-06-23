@@ -29,10 +29,10 @@ try:
 except Exception as e:
     sys.stderr.write(f"Error parsing options.json: {e}\n")
 ')
-    else:
+    else
         echo "[Warning] Python not found, unable to parse options.json. Using default environment."
     fi
-else:
+else
     echo "[Warning] No options file found at $OPTIONS_FILE. Using default environment."
 fi
 
