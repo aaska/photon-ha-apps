@@ -1,5 +1,5 @@
 name: "Photon Geocoder"
-version: "1.0.5"
+version: "1.0.6"
 slug: "photon_geocoder"
 description: "Self-hosted Photon geocoder and reverse geocoder based on OpenStreetMap data."
 arch:
