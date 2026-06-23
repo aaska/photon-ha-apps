@@ -36,35 +36,48 @@ else
     echo "[Warning] No options file found at $OPTIONS_FILE. Using default environment."
 fi
 
-# Ensure uv is globally accessible (in case it is installed under /root/.local/bin or similar)
-if ! command -v uv >/dev/null 2>&1; then
-    echo "[Info] uv not found in PATH. Searching common paths..."
-    FOUND_UV=""
-    for p in /root/.local/bin/uv /root/.cargo/bin/uv /usr/local/bin/uv /usr/bin/uv /bin/uv /home/photon/.local/bin/uv /home/photon/.cargo/bin/uv; do
-        if [ -f "$p" ]; then
-            FOUND_UV="$p"
-            break
-        fi
-    done
-
-    if [ -n "$FOUND_UV" ]; then
-        echo "[Info] Found uv at $FOUND_UV. Copying to /usr/local/bin/uv for global accessibility..."
-        cp "$FOUND_UV" /usr/local/bin/uv
-        chmod +x /usr/local/bin/uv
-    else
-        echo "[Warning] Could not find uv binary in the container."
+# Ensure uv is globally accessible (in case it is installed under root-only paths or custom directories)
+if [ ! -f "/usr/local/bin/uv" ]; then
+    PYTHON_CMD=""
+    if command -v python3 >/dev/null 2>&1; then
+        PYTHON_CMD="python3"
+    elif command -v python >/dev/null 2>&1; then
+        PYTHON_CMD="python"
     fi
-else
-    # Even if uv is in PATH for root, it might be in a root-restricted directory (like /root/.local/bin).
-    # Let's ensure it is copied to /usr/local/bin/uv so the non-root 'photon' user can execute it.
-    UV_CURRENT=$(command -v uv)
-    case "$UV_CURRENT" in
-        /root/*)
-            echo "[Info] uv is in root-only path ($UV_CURRENT). Copying to /usr/local/bin/uv..."
-            cp "$UV_CURRENT" /usr/local/bin/uv
-            chmod +x /usr/local/bin/uv
-            ;;
-    esac
+
+    if [ -n "$PYTHON_CMD" ]; then
+        $PYTHON_CMD -c '
+import os, sys, shutil
+print("[Info] uv not found in PATH. Searching filesystem...")
+found = []
+skip_dirs = {"/proc", "/sys", "/dev", "/data", "/photon/data", "/photon/photon_db"}
+for root, dirs, files in os.walk("/"):
+    # prune skipped dirs
+    if any(root.startswith(d) for d in skip_dirs):
+        dirs[:] = []
+        continue
+    if "uv" in files:
+        p = os.path.join(root, "uv")
+        if os.path.isfile(p) and os.access(p, os.X_OK) and p != "/usr/local/bin/uv":
+            found.append(p)
+            print(f"[Info] Found executable uv at: {p}")
+
+if found:
+    src = found[0]
+    dst = "/usr/local/bin/uv"
+    print(f"[Info] Copying {src} to {dst} for global access...")
+    try:
+        shutil.copy2(src, dst)
+        os.chmod(dst, 0o755)
+        print("[Info] Successfully made uv globally accessible.")
+    except Exception as e:
+        sys.stderr.write(f"Failed to copy uv: {e}\n")
+else:
+    print("[Warning] Could not find executable \x27uv\x27 binary in filesystem.")
+'
+    else:
+        echo "[Warning] Python not found, skipping uv search."
+    fi
 fi
 
 # Ensure persistent /data/photon_db directory exists and has permissive permissions
